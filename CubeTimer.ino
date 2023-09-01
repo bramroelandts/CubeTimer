@@ -23,7 +23,7 @@ bool previouslyPressed = false;
 
 // MARK: - Setup
 void setup() {
-
+  Serial.begin(9600);
   // Initialize the 8-segment display
   lc.shutdown(0,false);
   lc.setIntensity(0,4);
@@ -36,11 +36,15 @@ void setup() {
   printLCD(0, 6, 7);
   
   // Initialize the buttons
-  pinMode(rightButtonPin, INPUT);
-  pinMode(leftButtonPin, INPUT);
-  pinMode(resetButtonPin, INPUT);
+  pinMode(rightButtonPin, INPUT_PULLUP);
+  pinMode(leftButtonPin, INPUT_PULLUP);
+  pinMode(resetButtonPin, INPUT_PULLUP);
 }
 
+#define CHRONO_CLEAR 0
+#define CHRONO_HOLD 1
+#define CHRONO_RUNNING 2
+#define CHRONO_STOPPED 3
 
 // MARK: - Main loop
 void loop() {
@@ -52,36 +56,40 @@ void loop() {
   bool buttonsPressed = (rightButtonState == LOW) ? (leftButtonState == LOW) : false;
   bool oneButtonPressed = ((rightButtonState == LOW) || (leftButtonState == LOW));
 
-  // Handle the button press based on the game state
-  if (sessionInProgress) {
-  
-    // Check whether the game ended
-    if (oneButtonPressed) {
-      sessionInProgress = false;
-      clearCounter = 0;  
-    } else {
-      updateTime();
-    }
+  static int chronoState = 0; // initial state
+  switch (chronoState) {
+    case CHRONO_CLEAR:
     
-  } else {
+      if (buttonsPressed) {
+        
+        chronoState = CHRONO_HOLD;
+      }
+     break;
+    case CHRONO_HOLD:
+      if (!oneButtonPressed) {
+        chronoState = CHRONO_RUNNING;
+        startTime = micros()/1000;
+      }
+      break;
+    case CHRONO_RUNNING:
+      // Stop the chrono if any buttons; other than reset have been pressed
+      if (oneButtonPressed) {
+        chronoState = CHRONO_STOPPED;
+      } else {
+        updateTime();
+      }
+      break;
+    case CHRONO_STOPPED:
     
-    // Get ready to start a new game
-    if (buttonsPressed == false && previouslyPressed == true) {
-
-      // Start a new game
-      sessionInProgress = true;
-      previouslyPressed = false;
-      startTime = micros()/1000;
-      delay(100);
-          
-    } else if (buttonsPressed) {
-      previouslyPressed = true;
-    } else if (digitalRead(resetButtonPin) == HIGH) {
-      // Start the game
-      startTime = micros()/1000;
-      updateTime();
-    }
+      if (digitalRead(resetButtonPin) == LOW) {
+        chronoState = CHRONO_CLEAR;
+        // Zero the time
+        startTime = micros()/1000;
+        updateTime();
+      }
+      break;
   }
+ 
 }
 
 

@@ -15,7 +15,7 @@ High school can be boring. To keep awake during some classes, a few classmates a
 - Three push buttons
 - 8-character segment display
 
-![Arduino circuit](/Circuit.png)
+![Arduino circuit](/CubeTimer_bb.png)
 
 
 ### Arduino code
