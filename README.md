@@ -1,6 +1,6 @@
 # CubeTimer with Arduino
 
-High school can be boring. To keep awake during some classes, a few classmates and I started speed-solving the `Rubik's cube`. To settle the debate on who was actually the fastest solver, I built this Arduino-based **CubeTimer**.
+This project is based on an original work by bramroelandts, you can find his readme [here](https://github.com/bramroelandts/CubeTimer#readme)
 
 
 
